@@ -29,8 +29,10 @@ on the 1st.
 
 **Strategy return calculation**
 Deducted monthly cashflow from daily return:
+```python
 strategy_return = (port_value - port_value.shift(1) - cashflow_series) 
                   / port_value.shift(1)
+```
 Without this adjustment, the monthly investment inflow inflates the
 return figure — making the strategy look better than it is on buy days.
 
