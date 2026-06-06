@@ -9,19 +9,41 @@ I wanted to evaluate the original strategy and extended strategies I designed �
 to evaluate performance using proper metrics like IRR, Sharpe, MDD 
 — across different assets and periods, with yfinance numbers while keeping the logic transparent and reproducible.
 
+## How it works
+- Strategy A: buys on the first actual trading day of each month (not calendar day 1)
+- Strategy B: buys when the ETF (or RSP) drops ≥ 1% — executed next day at open;
+  falls back to the third Friday of the month if no dip occurs
+- IRR as primary return metric — accounts for cash flow timing unlike CAGR
+- Rolling Sharpe surfaces regime changes hidden by static metrics
+
 ## Results (2015–2025, $1,000/month)
 
-| Metric         | SPY        | QQQ        | IWY        |
-|----------------|------------|------------|------------|
-| Total Invested | 120,000    | 120,000    | 120,000    |
-| Final Value    | 256,240    | 334,890    | 337,098    |
-| IRR            | 15%        | 20%        | 20%        |
-| Volatility     | 18%        | 22%        | 20%        |
-| Sharpe         | 0.78       | 0.88       | 0.92       |
-| Sortino        | 0.95       | 1.12       | 1.15       |
-| MDD            | -33%       | -31%       | -30%       |
+### Strategy A — First Trading Day (Baseline)
 
-## Rolling Sharpe Ratio (252-day)
+| Metric         | SPY     | QQQ     | IWY     |
+|----------------|---------|---------|---------|
+| Total Invested | 120,000 | 120,000 | 120,000 |
+| Final Value    | 257,240 | 335,890 | 338,098 |
+| IRR            | 14.6%   | 19.5%   | 19.7%   |
+| Volatility     | 17.6%   | 21.8%   | 20.0%   |
+| Sharpe         | 0.78    | 0.88    | 0.92    |
+| Sortino        | 0.95    | 1.12    | 1.15    |
+| MDD            | -32.9%  | -31.4%  | -30.0%  |
+
+### Strategy B — Dip Signal + Third-Friday Fallback (QQQ, 2015–2025, Threshold = 1%)
+
+| Strategy & Signal Type | IRR    | Sharpe | MDD     |
+|------------------------|--------|--------|---------|
+| First Day              | 19.5%  | 0.88   | -31.4%  |
+| dip_self + close       | 19.6%  | 0.90   | -31.4%  |
+| dip_self + low         | 19.6%  | 0.89   | -31.4%  |
+| dip_rsp + close        | 19.6%  | 0.89   | -31.3%  |
+| dip_rsp + low          | 19.5%  | 0.89   | -31.3%  |
+
+**Finding:** Within QQQ, Conditional dip strategies (B) show marginal improvement over baseline (A) in Sharpe, IRR and MDD.
+Other assets show similar pattern.
+
+## Strategy A - Rolling Sharpe Ratio (252-day)
 
 ![Rolling Sharpe](assets/rolling_sharpe.png)
 
@@ -31,26 +53,33 @@ to evaluate performance using proper metrics like IRR, Sharpe, MDD
 | Max            | 3.60  | 3.15  | 4.14  |
 | Min            | -0.79 | -1.17 | -1.12 |
 
-All three ETFs peaked 2018-01-23 and bottomed 2022-12-28 — the Fed rate hike cycle is visible in rolling Sharpe.
-IWY: Best risk-adjusted return (highest Sharpe mean, highest max)
-QQQ: Highest absolute return (IRR 19%) but worst downside (min -1.17)
+**Finding:** Asset selection (SPY vs QQQ vs IWY) has a larger impact on outcome than signal timing within the same asset.
 
-## How it works
 
-- Buys on the first actual trading day of each month (not calendar day 1)
-- IRR as primary return metric — accounts for cash flow timing; CAGR assumes lump sum
-- Rolling Sharpe surfaces regime changes hidden by static metrics
+## Key Decisions & Tradeoffs
 
-## Key technical decisions
+**Incomplete date range > skip rather than truncate**
+When a ticker's available data starts after the requested start_date, the backtest skips that ticker entirely rather than running on a shorter window.
+Trade-off: fewer results shown, but avoids comparing strategies across unequal time periods.
 
-**First trading day detection**
-`groupby(pd.Grouper(freq="MS")).nth(0)` — not `.first()` or `resample()`,
-which return calendar month start regardless of whether markets are open.
+**Two dip signal variants: `close` vs `low`**
+`close` compares prior-day close-to-close return; `low` uses intraday low vs prior close.
+Both are valid assumptions depending on whether you execute at open or at close.
+Kept both as a `signal_type` parameter rather than hardcoding one.
 
-**`run_backtest()` returns `(metrics, df)` tuple**
-Rolling analysis reuses the same return stream from the main pipeline.
-Splitting into two functions would duplicate `load_data > calc_portfolio > calc_metrics`.
-Trade-off: downstream code unpacks a tuple instead of a plain dict.
+**Third-Friday fallback**
+Third Friday chosen as a fixed mid-month anchor to guarantee one buy per month.
+Trade-off: any dip occurring after the third Friday is missed for that month.
+
+**`dip_rsp` fallback to `dip_self`**
+When RSP data is unavailable, the pipeline falls back to self-signal rather than crashing.
+Trade-off: the two signals have different economic assumptions (broad market breadth vs own-price momentum);
+fallback is a pipeline safety net, not a strategy equivalence.
+
+**Monthly wallet = 1**
+Even when multiple dip signals fire in the same month, only the first is executed.
+wallet = 2 would better capture consecutive down days, but increases pipeline complexity and makes cash flow less predictable.
+Kept at 1 for MVP scope; can be parameterised later.
 
 
 ## Limitations & next steps
@@ -61,6 +90,6 @@ Trade-off: downstream code unpacks a tuple instead of a plain dict.
 - Local parquet only; no live data feed
 
 **Planned**
-- Strategy B: Buy only on down months (conditional signal)
+- Strategy C: additional buy when monthly return drops ≥ 5% (additive layer on Strategy A)
 - Gemini API: Auto-generate narrative report from metrics dict
 - GCS + BigQuery: Replace local parquet with cloud pipeline
