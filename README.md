@@ -31,7 +31,7 @@ to evaluate performance using proper metrics like IRR, Sharpe, MDD
 | Sortino        | 0.95    | 1.12    | 1.15    |
 | MDD            | -32.9%  | -31.4%  | -30.0%  |
 
-**Finding:** ETF selection had more impact on 10-year IRR than any timing overlay tested (see below) — 
+**Finding:** ETF selection had more impact on 10-year IRR than any timing overlay tested — 
 QQQ/IWY outperformed SPY by ~5pp IRR (19.5-19.7% vs 14.6%) on identical DCA execution. 
 
 ### Dip Strategy — Dip Signal + Third-Friday Fallback (QQQ, 2015–2025, Threshold = 1%)
