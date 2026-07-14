@@ -72,6 +72,29 @@ This raised a cleaner experimental question — isolating signal edge requires e
 **Finding:** This rolling Sharpe shows growth (QQQ/IWY) vs SPY leadership mean-reverts over time. Combined with W4 result — same-asset drawdown 
 timing added negligible IRR — this suggests cross-asset rotation may carry more signal than within-asset entry timing, worth testing in W6.
 
+## Cross-Validation Against PortfolioVisualizer: A Debugging Case Study
+
+Per the strategy comparison table above, SPY showed the deepest MDD at -32.9%.
+While validating this against PortfolioVisualizer.com, I found a significant
+discrepancy for SPY during the 2020 COVID crash: my daily-granularity backtest
+reported -32.93%, versus -15.99% from PortfolioVisualizer for a comparable
+monthly DCA setup (2017-2025, $1 initial + $1,000/month, no rebalancing).
+
+Cross-checked raw SPY prices against TradingView and confirmed the pipeline
+correctly isolates the 2020-02-19 to 2020-03-23 trough — no bug found.
+The gap is explained by two compounding factors:
+
+1. **Granularity**: My backtest uses daily `port_value`, capturing the
+   intra-month trough. PortfolioVisualizer uses month-end balances only,
+   which systematically understates drawdown by masking intra-month recoveries.
+2. **Data source**: PortfolioVisualizer uses a Morningstar total-return index
+   (dividends reinvested); I pull raw OHLC via yfinance — the two series
+   don't align tick-for-tick during high-volatility days.
+
+**Takeaway:** MDD isn't a single universally-defined number — it depends on
+sampling frequency and price series. Daily granularity is more conservative
+and more decision-useful for risk management, so I kept it as the default,
+with this trade-off documented rather than assumed.
 
 ## Key Decisions & Tradeoffs
 
