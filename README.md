@@ -95,8 +95,7 @@ model's prose; model selection is itself part of the hallucination defense,
 separate from the layer-separation design (see Key Decisions) which 
 protects the verdict layer regardless of which model narrates it. Target 
 size range was 20–30B for narrative coherence at acceptable latency (~15s/
-call); the 9B model was correct but low-quality, and larger free-tier 
-options were more prone to connection failures.
+call); the 9B model was correct but low-quality.
 
 ## Cross-Validation Against PortfolioVisualizer: A Debugging Case Study
 
