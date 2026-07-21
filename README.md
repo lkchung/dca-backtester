@@ -164,6 +164,5 @@ Trade-off: Higher initial implementation complexity and custom error handling.
 - Drawdown overlay tests capital deployment effect, not signal timing edge; a correct signal-edge test requires equal-capital isolated strategies (W6)
 
 **Planned**
-- W5: Gemini API — pass metrics dict, generate narrative investment report with regime analysis
 - W6: Independent strategy comparison — equal-capital isolated signals to correctly isolate timing alpha
 - W8: GCS + BigQuery — replace local parquet with cloud pipeline
