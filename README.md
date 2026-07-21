@@ -72,6 +72,32 @@ This raised a cleaner experimental question — isolating signal edge requires e
 **Finding:** This rolling Sharpe shows growth (QQQ/IWY) vs SPY leadership mean-reverts over time. Combined with W4 result — same-asset drawdown 
 timing added negligible IRR — this suggests cross-asset rotation may carry more signal than within-asset entry timing, worth testing in W6.
 
+### LLM Narration — Model Selection (manual test, SPY overlay narrative)
+
+Each model was tested individually (not via the fallback loop) to avoid 
+rate-limit noise from batch calls. Output judged on: (1) consistency with 
+Python-derived verdict, (2) conciseness, (3) format compliance.
+
+| Model | Result |
+| gemma-4-26b-a4b | Concise, consistent with verdict — selected as primary |
+| gemma-4-31b | Connection failure (suspected rate limit) |
+| gpt-oss-20b | Output not in English despite prompt instruction |
+| nemotron-nano-9b | Verbose, low information density |
+| cohere/north-mini | Self-contradictory — described MDD as "worse" while its 
+  own cited numbers showed improvement |
+
+**Finding:** Only 1 of 5 manually tested free-tier models produced narration 
+that was both concise and internally consistent; the model list and order 
+in `_DEFAULT_MODELS` reflects this testing, not arbitrary selection. The 
+cohere failure — contradicting its own cited figures — is a reminder that 
+prompt constraints alone don't guarantee logical consistency in a single 
+model's prose; model selection is itself part of the hallucination defense, 
+separate from the layer-separation design (see Key Decisions) which 
+protects the verdict layer regardless of which model narrates it. Target 
+size range was 20–30B for narrative coherence at acceptable latency (~15s/
+call); the 9B model was correct but low-quality, and larger free-tier 
+options were more prone to connection failures.
+
 ## Cross-Validation Against PortfolioVisualizer: A Debugging Case Study
 
 Per the strategy comparison table above, SPY showed the deepest MDD at -32.9%.
