@@ -107,11 +107,6 @@ Trade-off: fewer results shown, but avoids comparing strategies across unequal t
 Both are valid assumptions depending on whether you execute at open or at close.
 Kept both as a `signal_type` parameter rather than hardcoding one.
 
-**`dip_rsp` fallback to `dip_self`**
-When RSP data is unavailable, the pipeline falls back to self-signal rather than crashing.
-Trade-off: the two signals have different economic assumptions (broad market breadth vs own-price momentum);
-fallback is a pipeline safety net, not a strategy equivalence.
-
 **Monthly wallet = 1**
 Even when multiple dip signals fire in the same month, only the first is executed.
 wallet = 2 would better capture consecutive down days, but increases pipeline complexity and makes cash flow less predictable.
@@ -121,6 +116,19 @@ Kept at 1 for MVP scope; can be parameterised later.
 When the base signal (first trading day) and drawdown overlay fire on the same date,
 only one buy is executed and the drawdown buy is dropped (`keep="first"`).
 This understates total capital deployed on overlap days. Accepted for MVP; correct treatment would allow both executions.
+
+**Two-layer defense against LLM judgment on multi-row data**
+Passing the full multi-ticker summary DataFrame directly to the LLM risks on both misreading rows and inconsistent significance judgments across runs. 
+Addressed with two layers: 
+(1) pre-aggregation in Python (get_base_metrics(), calc_overlay_effect()) reshapes data into small per-ticker dicts before any LLM call; 
+(2) significance verdicts are computed and thresholded in Python (summarize_overlay_effect()), 
+with the prompt explicitly instructing the LLM's role is narration only, LLM not to re-derive them. 
+
+**Sequential model fallback over single-provider dependency**
+_call_openrouter() tries a list of free-tier models in order, returning on first success. 
+Migrated Gemini → Groq → OpenRouter during development due to restrctions.
+Trade-off: no guaranteed model consistency between runs (today's narrative may come from a different model than yesterday's), 
+but meaningfully reduces single point of failure risk without paying for a dedicated model.
 
 
 ## Limitations & next steps
