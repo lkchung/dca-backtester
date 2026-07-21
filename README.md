@@ -132,11 +132,6 @@ Trade-off: fewer results shown, but avoids comparing strategies across unequal t
 Both are valid assumptions depending on whether you execute at open or at close.
 Kept both as a `signal_type` parameter rather than hardcoding one.
 
-**Monthly wallet = 1**
-Even when multiple dip signals fire in the same month, only the first is executed.
-wallet = 2 would better capture consecutive down days, but increases pipeline complexity and makes cash flow less predictable.
-Kept at 1 for MVP scope; can be parameterised later.
-
 **Same-day Base+Drawdown overlap — deduplication, not wallet**
 When the base signal (first trading day) and drawdown overlay fire on the same date,
 only one buy is executed and the drawdown buy is dropped (`keep="first"`).
@@ -155,6 +150,9 @@ Migrated Gemini → Groq → OpenRouter during development due to restrctions.
 Trade-off: no guaranteed model consistency between runs (today's narrative may come from a different model than yesterday's), 
 but meaningfully reduces single point of failure risk without paying for a dedicated model.
 
+**Direct HTTP Requests over Official SDKs**
+Ensures future-proof stability and immediate access to new endpoint features in a fast-evolving LLM ecosystem, without depending on SDK update cycles.
+Trade-off: Higher initial implementation complexity and custom error handling.
 
 ## Limitations & next steps
 
