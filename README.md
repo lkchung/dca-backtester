@@ -44,8 +44,8 @@ QQQ/IWY outperformed SPY by ~5pp IRR (19.5-19.7% vs 14.6%) on identical DCA exec
 | dip_rsp + close        | 19.6%  | 0.89   | -31.3%  |
 | dip_rsp + low          | 19.5%  | 0.89   | -31.3%  |
 
-**Finding:** Within QQQ, Conditional dip strategies show marginal improvement over baseline in Sharpe, IRR and MDD.
-Other assets show similar pattern.
+**Finding:** Within QQQ, dip-triggered singal moved IRR/Sharpe/MDD by less than 0.2pp against baseline — 
+statistically indistinguishable from noise. This -1% dip signal was dropped in favor of testing a -5%/-7% drawdown threshold (below), to check whether a larger, less frequent trigger would produce a more meaningful signal.
 
 ### Drawdown Strategy - Drawdown overlay produces no meaningful alpha (QQQ, 2015–2025, Threshold = 5%/7%)
 
