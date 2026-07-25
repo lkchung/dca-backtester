@@ -34,31 +34,6 @@ to evaluate performance using proper metrics like IRR, Sharpe, MDD
 **Finding:** ETF selection had more impact on 10-year IRR than any timing overlay tested — 
 QQQ/IWY outperformed SPY by ~5pp IRR (19.5-19.7% vs 14.6%) on identical DCA execution. 
 
-### Dip Strategy — Dip Signal + Third-Friday Fallback (QQQ, 2015–2025, Threshold = 1%)
-
-| Strategy & Signal Type | IRR    | Sharpe | MDD     |
-|------------------------|--------|--------|---------|
-| First Day              | 19.5%  | 0.88   | -31.4%  |
-| dip_self + close       | 19.6%  | 0.90   | -31.4%  |
-| dip_self + low         | 19.6%  | 0.89   | -31.4%  |
-| dip_rsp + close        | 19.6%  | 0.89   | -31.3%  |
-| dip_rsp + low          | 19.5%  | 0.89   | -31.3%  |
-
-**Finding:** Within QQQ, dip-triggered singal moved IRR/Sharpe/MDD by less than 0.2pp against baseline — 
-statistically indistinguishable from noise. This -1% dip signal was dropped in favor of testing a -5%/-7% drawdown threshold (below), to check whether a larger, less frequent trigger would produce a more meaningful signal.
-
-### Drawdown Strategy - Drawdown overlay produces no meaningful alpha (QQQ, 2015–2025, Threshold = 5%/7%)
-
-| Strategy & Signal Type        | IRR     | Sharpe | MDD     |
-|-------------------------------|---------|--------|---------|
-| First Day                     | 19.53%  | 0.88   | -31.4%  |
-| drawdown_self -5% + close     | 19.40%  | 0.87   | -30.3%  |
-| drawdown_self -7% + close     | 19.47%  | 0.87   | -31.9%  |
-
-**Findings:** Adding a -5%/-7% monthly drawdown overlay on top of Base Strategy improved IRR by < 0.02% across all three ETFs over 10 years.
-Two causes: (1) signal triggers only ~15–20 times per decade, statistically diluted by 120 base-layer purchases; (2) IRR improvement reflects beta amplification from deploying more capital, not timing edge.
-This raised a cleaner experimental question — isolating signal edge requires equal-capital independent strategies, not overlays. Addressed in W6.
-
 ## Base Strategy - Rolling Sharpe Ratio (252-day)
 
 ![Rolling Sharpe](assets/rolling_sharpe.png)
@@ -71,6 +46,33 @@ This raised a cleaner experimental question — isolating signal edge requires e
 
 **Finding:** This rolling Sharpe shows growth (QQQ/IWY) vs SPY leadership mean-reverts over time. Combined with W4 result — same-asset drawdown 
 timing added negligible IRR — this suggests cross-asset rotation may carry more signal than within-asset entry timing, worth testing in W6.
+
+### Dip Strategy — Dip Signal + Third-Friday Fallback (QQQ, 2015–2025, Threshold = 1%)
+
+| Strategy & Signal Type | IRR    | Sharpe | MDD     |
+|------------------------|--------|--------|---------|
+| First Day              | 19.5%  | 0.88   | -31.4%  |
+| dip_self + close       | 19.6%  | 0.90   | -31.4%  |
+| dip_self + low         | 19.6%  | 0.89   | -31.4%  |
+| dip_rsp + close        | 19.6%  | 0.89   | -31.3%  |
+| dip_rsp + low          | 19.5%  | 0.89   | -31.3%  |
+
+**Finding:** Within QQQ, dip-triggered singal moved IRR/Sharpe/MDD by less than 0.2pp against baseline — 
+statistically indistinguishable from noise. This -1% dip signal was dropped in favor of testing a 
+-5%/-7% drawdown threshold (below), to check whether a larger, less frequent trigger would produce a more meaningful signal.
+
+### Drawdown Strategy - Drawdown overlay produces no meaningful alpha (QQQ, 2015–2025, Threshold = 5%/7%)
+
+| Strategy & Signal Type        | IRR     | Sharpe | MDD     |
+|-------------------------------|---------|--------|---------|
+| First Day                     | 19.53%  | 0.880  | -31.4%  |
+| drawdown_self -5% + close     | 19.50%  | 0.871  | -30.1%  |
+| drawdown_self -7% + close     | 19.54%  | 0.872  | -30.2%  |
+
+**Findings:** Adding a -5%/-7% monthly drawdown overlay on top of Base Strategy improved IRR by < 0.02% across all three ETFs over 10 years.
+Two causes: (1) signal triggers only ~15–20 times per decade, statistically diluted by 120 base-layer purchases; (2) IRR improvement reflects beta amplification from deploying more capital, not timing edge.
+At this point, we can conclude ETF selection had more impact on 10-year IRR than any timing overlay tested.
+This raised a cleaner experimental question — isolating signal edge requires equal-capital independent strategies, not overlays. Addressed in W6.
 
 ### LLM Narration — Model Selection (manual test, SPY overlay narrative)
 
